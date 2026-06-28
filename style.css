@@ -844,3 +844,33 @@ html, body {
     .result-value { font-size: 0.85rem; }
     .result-value.mono { font-size: 0.8rem; }
 }
+
+/* ═══ VERSION BADGE ══════════════════════════════════════════════ */
+.version-badge {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    z-index: var(--z-panels);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: rgba(0, 212, 255, 0.45);
+    background: rgba(2, 8, 22, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 3px;
+    padding: 0.22rem 0.55rem;
+    pointer-events: none;
+    user-select: none;
+    transition: color 0.2s, border-color 0.2s;
+}
+.version-badge:hover {
+    color: rgba(0, 212, 255, 0.75);
+    border-color: rgba(0, 212, 255, 0.25);
+    pointer-events: auto;
+}
+
+@media (max-width: 700px) {
+    .version-badge { bottom: 80px; }
+}

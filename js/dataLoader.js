@@ -62,3 +62,32 @@ export async function loadSystems(url = './data/systems.json') {
 
     return data;
 }
+
+/**
+ * Fetches the application version string from package.json.
+ * Keeps the version number as a single source of truth — no duplicate constants.
+ *
+ * @param {string} [url='./package.json'] - Path to package.json.
+ * @returns {Promise<string>} The `version` field value (e.g. "0.1.1").
+ * @throws {Error} If the fetch fails or the version field is missing.
+ */
+export async function loadVersion(url = './package.json') {
+    let response;
+    try {
+        response = await fetch(url);
+    } catch (networkError) {
+        throw new Error(`Network error loading package.json: ${networkError.message}`);
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to load package.json: HTTP ${response.status}`);
+    }
+
+    const pkg = await response.json();
+
+    if (typeof pkg.version !== 'string') {
+        throw new Error('package.json does not contain a valid "version" field.');
+    }
+
+    return pkg.version;
+}

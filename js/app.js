@@ -5,7 +5,7 @@
  * Last Modified: 2026-06-28
  */
 
-import { loadSystems }                from './dataLoader.js';
+import { loadSystems, loadVersion }   from './dataLoader.js';
 import { calculateRoute }             from './physics.js';
 import * as renderer                  from './renderer.js';
 import { init as initInteraction }    from './interaction.js';
@@ -34,8 +34,13 @@ async function bootstrap() {
     ui.setLoading(true);
 
     try {
-        // 1. Load stellar data
-        state.systems = await loadSystems('./data/systems.json');
+        // 1. Load stellar data and version in parallel
+        const [systems, version] = await Promise.all([
+            loadSystems('./data/systems.json'),
+            loadVersion('./package.json'),
+        ]);
+        state.systems = systems;
+        ui.setVersion(version);
 
         // 2. Initialise 3D scene
         const canvas = document.getElementById('starmap-canvas');

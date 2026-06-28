@@ -100,6 +100,16 @@ export function setSystemCount(n) {
 }
 
 /**
+ * Sets the version badge text in the bottom-right corner.
+ * Version is read from package.json at runtime — no duplicate constants.
+ * @param {string} version - e.g. "0.1.1"
+ */
+export function setVersion(version) {
+    const el = $id('version-badge');
+    if (el) el.textContent = `v${version}`;
+}
+
+/**
  * Shows or hides the loading overlay.
  * @param {boolean} visible
  */

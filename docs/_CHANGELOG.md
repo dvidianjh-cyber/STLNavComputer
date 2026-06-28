@@ -5,6 +5,16 @@ Format: `[vX.X.X] — YYYY-MM-DD`
 
 ---
 
+## [v0.1.1] — 2026-06-28
+
+### Added
+- **Version badge** — small `v{version}` tag in the bottom-right corner of the UI. Version is fetched at runtime from `package.json` (single source of truth — no duplicate constants).
+
+### Fixed
+- **GitHub Pages hosting** — added `.nojekyll` to the repository root. This disables Jekyll processing, which was failing with a Liquid syntax error on `{{` characters in the implementation plan docs.
+
+---
+
 ## [v0.1.0] — 2026-06-28
 
 ### Added
