@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<!-- Last Modified: 2026-06-28 | v0.1.0 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nav-Computer // Ondari Empire</title>
+    <meta name="description" content="Ondari Empire STL Navigation Computer — 3D interactive stellar map and relativistic journey planner for the 40 light-year local neighbourhood.">
+    <meta name="theme-color" content="#000a1a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+
+    <!-- 3D Canvas -->
+    <canvas id="starmap-canvas" aria-label="3D interactive stellar map"></canvas>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOADING OVERLAY
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite">
+        <div class="loading-content">
+            <div class="loading-rings">
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <div class="ring ring-3"></div>
+            </div>
+            <p class="loading-title">NAV-COMPUTER</p>
+            <p class="loading-subtitle" id="loading-subtitle">INITIALISING STELLAR DATABASE…</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         HEADER — TOP LEFT
+    ═══════════════════════════════════════════════════════════ -->
+    <header class="ui-panel panel-header" id="panel-header" aria-label="Application title">
+        <div class="header-title">NAV-COMPUTER</div>
+        <div class="header-sub">ONDARI EMPIRE // STL NAVIGATION SYSTEM</div>
+        <div class="header-badge">
+            <span class="badge-dot"></span>
+            <span id="system-count">0</span> SYSTEMS CHARTED
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         JOURNEY PLANNER — RIGHT PANEL
+    ═══════════════════════════════════════════════════════════ -->
+    <aside class="ui-panel panel-planner" id="panel-planner" aria-label="Journey planner">
+        <h1 class="panel-heading">
+            <span class="heading-icon">⬡</span>
+            JOURNEY PLANNER
+        </h1>
+
+        <!-- Drive Parameters -->
+        <div class="param-group">
+            <div class="param-label-row">
+                <span class="param-label">DRIVE OUTPUT</span>
+                <span class="param-range">0.1 – 100 G</span>
+            </div>
+            <div class="param-input-row">
+                <input type="number" id="g-force-input" class="param-input" min="0.1" max="100" step="0.1" value="1.0" aria-label="Drive output in Gs">
+                <span class="param-unit">G</span>
+            </div>
+        </div>
+
+        <div class="param-group">
+            <div class="param-label-row">
+                <span class="param-label">MAX CRUISE VELOCITY</span>
+                <span class="param-range">0.1 – 99.99999%</span>
+            </div>
+            <div class="param-input-row">
+                <input type="number" id="cruise-speed-input" class="param-input" min="0.1" max="99.99999" step="0.1" value="99.0" aria-label="Max cruise velocity as percent of c">
+                <span class="param-unit">% c</span>
+            </div>
+        </div>
+
+        <div class="param-group">
+            <div class="param-label-row">
+                <span class="param-label">LAYOVER AT EACH STOP</span>
+                <span class="param-range">DAYS</span>
+            </div>
+            <div class="param-input-row">
+                <input type="number" id="layover-input" class="param-input" min="0" step="1" value="0" aria-label="Layover time in days at intermediate stops">
+                <span class="param-unit">DAYS</span>
+            </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Flight Plan -->
+        <div class="flight-plan-header">
+            <span class="param-label">FLIGHT PLAN</span>
+            <button id="btn-add-stop" class="btn-add-stop" title="Add an intermediate waypoint" aria-label="Add intermediate stop">
+                + ADD STOP
+            </button>
+        </div>
+
+        <div id="stops-list" class="stops-list" role="list" aria-label="Route waypoints">
+            <!-- Populated by ui.js -->
+        </div>
+
+        <div class="planner-actions">
+            <button id="btn-calculate" class="btn-calculate" disabled aria-label="Calculate route">
+                <span class="btn-icon">▶</span> CALCULATE ROUTE
+            </button>
+            <button id="btn-clear-route" class="btn-clear" style="display:none" aria-label="Clear current route">
+                ✕ CLEAR ROUTE
+            </button>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         RESULTS STRIP — BOTTOM
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="ui-panel panel-results" id="panel-results" aria-label="Journey calculation results">
+        <div class="result-block">
+            <span class="result-label">TOTAL DISTANCE</span>
+            <div class="result-value-row">
+                <span class="result-value mono" id="result-distance">—</span>
+                <span class="result-unit">LY</span>
+            </div>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-block">
+            <span class="result-label">OBJECTIVE TIME</span>
+            <div class="result-value-row">
+                <span class="result-value mono" id="result-obj-time">AWAITING INPUT</span>
+                <span class="result-unit" id="result-obj-unit"></span>
+            </div>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-block">
+            <span class="result-label">SUBJECTIVE TIME</span>
+            <div class="result-value-row">
+                <span class="result-value mono" id="result-subj-time">—</span>
+                <span class="result-unit" id="result-subj-unit"></span>
+            </div>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-block">
+            <span class="result-label">TIME DILATION</span>
+            <div class="result-value-row">
+                <span class="result-value mono" id="result-dilation">—</span>
+                <span class="result-unit">γ avg</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LEGEND — BOTTOM LEFT
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="ui-panel panel-legend" id="panel-legend" aria-label="Map legend">
+        <div class="legend-section-title">SYSTEM TYPE</div>
+        <div class="legend-row">
+            <span class="legend-dot dot-habitable"></span>
+            <span class="legend-text">Habitable Hub</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-dot dot-industrial"></span>
+            <span class="legend-text">Industrial / Mining</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-dot dot-anomaly"></span>
+            <span class="legend-text">Scientific Anomaly</span>
+        </div>
+
+        <div class="legend-divider"></div>
+
+        <div class="legend-section-title">FLIGHT PHASE</div>
+        <div class="legend-row">
+            <span class="legend-line line-acc"></span>
+            <span class="legend-text">Acceleration / Decel.</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-line line-cruise"></span>
+            <span class="legend-text">Cruise Phase</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         DYNAMIC CONTAINERS (injected by JS)
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="cards-container" aria-label="Pinned system cards" aria-live="polite"></div>
+
+    <div id="hover-tooltip" class="hover-tooltip" style="display:none" role="tooltip" aria-live="polite"></div>
+
+    <!-- Systems datalist for autocomplete -->
+    <datalist id="systems-datalist"></datalist>
+
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>

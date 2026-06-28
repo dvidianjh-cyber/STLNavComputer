@@ -1,0 +1,535 @@
+[
+    {
+        "id": "sys_001",
+        "name": "Aethelgard Prime",
+        "coordinates": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 3,
+        "stellarType": "G2V (Yellow Dwarf)",
+        "description": "The Imperial Capital system. Three pristine continental worlds form the political and economic core of the empire."
+    },
+    {
+        "id": "sys_002",
+        "name": "Solaria",
+        "coordinates": {
+            "x": 0.8,
+            "y": -1.0,
+            "z": 0.6
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K3V (Orange Dwarf)",
+        "description": "Early interstellar colony. Highly dense agricultural world and a secondary ocean world with extensive floating cities."
+    },
+    {
+        "id": "sys_003",
+        "name": "Vandor Alpha",
+        "coordinates": {
+            "x": -2.0,
+            "y": 1.4,
+            "z": 1.4
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 2,
+        "stellarType": "M1V (Red Dwarf)",
+        "description": "Massive automated mining rigs stripping a dense asteroid belt rich in heavy metals."
+    },
+    {
+        "id": "sys_004",
+        "name": "Zephyrus",
+        "coordinates": {
+            "x": 1.5,
+            "y": 2.5,
+            "z": -2.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "G8V (Yellow Dwarf)",
+        "description": "Twin terrestrial planets with dense nitrogen-oxygen atmospheres; major cultural and artistic centers."
+    },
+    {
+        "id": "sys_005",
+        "name": "Caelum Minor",
+        "coordinates": {
+            "x": -3.0,
+            "y": -3.0,
+            "z": 2.4
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "K0V (Orange Dwarf)",
+        "description": "A chilly but breathable world dedicated to terraforming research and massive seed-banking vaults."
+    },
+    {
+        "id": "sys_006",
+        "name": "The Anvil",
+        "coordinates": {
+            "x": 4.0,
+            "y": -2.0,
+            "z": -2.7
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 3,
+        "stellarType": "White Dwarf",
+        "description": "Industrial shipyard hubs utilizing the intense gravitational field of a dead star core for precision hull forging."
+    },
+    {
+        "id": "sys_007",
+        "name": "Xanadu",
+        "coordinates": {
+            "x": 2.0,
+            "y": 5.0,
+            "z": 3.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "G5V (Yellow Dwarf)",
+        "description": "Tropical paradise worlds acting as the primary luxury tourism and medical convalescence sectors for the empire."
+    },
+    {
+        "id": "sys_008",
+        "name": "Boreas",
+        "coordinates": {
+            "x": -5.0,
+            "y": 4.0,
+            "z": -3.9
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "K5V (Orange Dwarf)",
+        "description": "An ice-locked world with vast subterranean geothermal cities and heavy lithium mining operations."
+    },
+    {
+        "id": "sys_009",
+        "name": "Helios Flare",
+        "coordinates": {
+            "x": 1.0,
+            "y": -6.0,
+            "z": 5.2
+        },
+        "type": "Scientific Anomaly",
+        "colonyCount": 1,
+        "stellarType": "M4V (Red Dwarf)",
+        "description": "A hyper-active flare star studied for its unique magneto-hydrodynamic disruptions to sub-light communications."
+    },
+    {
+        "id": "sys_010",
+        "name": "Thalassa",
+        "coordinates": {
+            "x": -6.0,
+            "y": -6.0,
+            "z": -4.3
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 3,
+        "stellarType": "K2V (Orange Dwarf)",
+        "description": "A triple-planet system consisting of two sprawling archipelago worlds and a dry savanna moon."
+    },
+    {
+        "id": "sys_011",
+        "name": "Krypton's Edge",
+        "coordinates": {
+            "x": 7.0,
+            "y": 6.0,
+            "z": -5.2
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 1,
+        "stellarType": "M0V (Red Dwarf)",
+        "description": "Heavy gravity mining outpost harvesting super-dense silicate crystals from a fractured rocky planetesimal."
+    },
+    {
+        "id": "sys_012",
+        "name": "New Avalon",
+        "coordinates": {
+            "x": -8.0,
+            "y": -4.0,
+            "z": 6.6
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "G1V (Yellow Dwarf)",
+        "description": "Major breadbasket system with two terraformed planets supplying agricultural goods to the inner core."
+    },
+    {
+        "id": "sys_013",
+        "name": "Obsidian",
+        "coordinates": {
+            "x": 3.0,
+            "y": 9.0,
+            "z": 8.1
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 2,
+        "stellarType": "K7V (Orange Dwarf)",
+        "description": "Volcanically active moons harvested for rare rare-earth elements and high-grade industrial diamonds."
+    },
+    {
+        "id": "sys_014",
+        "name": "Geryon",
+        "coordinates": {
+            "x": -9.0,
+            "y": 7.0,
+            "z": -6.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "G6V (Yellow Dwarf)",
+        "description": "A dry desert world famous for its deep canyon biomes and ancient fossilized silicon-based structures."
+    },
+    {
+        "id": "sys_015",
+        "name": "Hyperion Gas",
+        "coordinates": {
+            "x": 10.0,
+            "y": -7.0,
+            "z": -8.1
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 3,
+        "stellarType": "M2V (Red Dwarf)",
+        "description": "Atmospheric skimming platforms extracting helium-3 and deuterium from two colossal gas giants."
+    },
+    {
+        "id": "sys_016",
+        "name": "Tantalus",
+        "coordinates": {
+            "x": -5.0,
+            "y": -11.0,
+            "z": 9.2
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K4V (Orange Dwarf)",
+        "description": "Rich in mineral deposits and arable land; hosts a fiercely independent network of mining metropolises."
+    },
+    {
+        "id": "sys_017",
+        "name": "The Chronos Void",
+        "coordinates": {
+            "x": 12.0,
+            "y": 8.0,
+            "z": 7.4
+        },
+        "type": "Scientific Anomaly",
+        "colonyCount": 1,
+        "stellarType": "Neutron Star",
+        "description": "A rapidly spinning pulsar creating intense time-dilation boundary fields used to test experimental FTL shielding."
+    },
+    {
+        "id": "sys_018",
+        "name": "Arcadia",
+        "coordinates": {
+            "x": -13.0,
+            "y": 6.0,
+            "z": -10.7
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "G3V (Yellow Dwarf)",
+        "description": "Stunning ringed habitable world with a densely populated temperate moon acting as a trading gateway."
+    },
+    {
+        "id": "sys_019",
+        "name": "Ragnarok",
+        "coordinates": {
+            "x": 7.0,
+            "y": -14.0,
+            "z": -10.0
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 1,
+        "stellarType": "M3V (Red Dwarf)",
+        "description": "Iron-core planet stripped down by orbital kinetic pulverizers for bulk structural steel manufacturing."
+    },
+    {
+        "id": "sys_020",
+        "name": "Castalia",
+        "coordinates": {
+            "x": -11.0,
+            "y": -12.0,
+            "z": -10.4
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "K1V (Orange Dwarf)",
+        "description": "A vast ocean planet hosting thousands of floating aquacultural platforms and bio-pharmaceutical labs."
+    },
+    {
+        "id": "sys_021",
+        "name": "Elysium",
+        "coordinates": {
+            "x": 15.0,
+            "y": 10.0,
+            "z": -9.3
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 3,
+        "stellarType": "G4V (Yellow Dwarf)",
+        "description": "Three highly urbanized ecumenopolis worlds acting as the secondary administrative nexus of the outer rim."
+    },
+    {
+        "id": "sys_022",
+        "name": "Styx Deep",
+        "coordinates": {
+            "x": -14.0,
+            "y": -12.0,
+            "z": 10.5
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 1,
+        "stellarType": "White Dwarf",
+        "description": "Dark sector outpost extracting dark matter remnants and exotic matter from an ancient accretion disk."
+    },
+    {
+        "id": "sys_023",
+        "name": "Valhalla",
+        "coordinates": {
+            "x": 16.0,
+            "y": -9.0,
+            "z": 12.5
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K6V (Orange Dwarf)",
+        "description": "Rugged mountain worlds settled by industrial clans; major manufacturing centers for atmospheric scrubbers."
+    },
+    {
+        "id": "sys_024",
+        "name": "Phlegethon",
+        "coordinates": {
+            "x": -8.0,
+            "y": 18.0,
+            "z": -13.2
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 2,
+        "stellarType": "M5V (Red Dwarf)",
+        "description": "Super-heated mining outposts built inside hollowed-out asteroids orbiting perilously close to the star."
+    },
+    {
+        "id": "sys_025",
+        "name": "Olympius",
+        "coordinates": {
+            "x": 17.0,
+            "y": 12.0,
+            "z": 12.4
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "G0V (Yellow Dwarf)",
+        "description": "High-gravity terrestrial worlds with sprawling subterranean military academies and defense bastions."
+    },
+    {
+        "id": "sys_026",
+        "name": "Titan's Cradle",
+        "coordinates": {
+            "x": -19.0,
+            "y": -12.0,
+            "z": -13.1
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 1,
+        "stellarType": "K9V (Orange Dwarf)",
+        "description": "Methane-sea moon outpost processing advanced hydrocarbon polymers and synthetic starship fuels."
+    },
+    {
+        "id": "sys_027",
+        "name": "Lethe",
+        "coordinates": {
+            "x": 20.0,
+            "y": -11.0,
+            "z": 13.5
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "G9V (Yellow Dwarf)",
+        "description": "A foggy, marshy world with a highly complex native flora ecosystem heavily studied for genetic engineering."
+    },
+    {
+        "id": "sys_028",
+        "name": "The Siren Stars",
+        "coordinates": {
+            "x": -12.0,
+            "y": 21.0,
+            "z": 14.1
+        },
+        "type": "Scientific Anomaly",
+        "colonyCount": 1,
+        "stellarType": "Binary A-type",
+        "description": "A spectacular pair of bright blue-white stars emitting a harmonic radio resonance that scrambles navigation arrays."
+    },
+    {
+        "id": "sys_029",
+        "name": "Asgard",
+        "coordinates": {
+            "x": 21.0,
+            "y": 14.0,
+            "z": -13.3
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K2V (Orange Dwarf)",
+        "description": "Twin alpine worlds characterized by massive evergreen biomes and high-tech civilian research enclaves."
+    },
+    {
+        "id": "sys_030",
+        "name": "Vulkan Forge",
+        "coordinates": {
+            "x": -21.0,
+            "y": -16.0,
+            "z": 14.4
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 3,
+        "stellarType": "M1V (Red Dwarf)",
+        "description": "A massive complex of orbital foundries smelting heavy plating for the Imperial starfleet."
+    },
+    {
+        "id": "sys_031",
+        "name": "Calypso",
+        "coordinates": {
+            "x": 12.0,
+            "y": 24.0,
+            "z": -14.3
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "G5V (Yellow Dwarf)",
+        "description": "A misty planet covered in vast fungal forests and bioluminescent biomes; major luxury pharmaceutical source."
+    },
+    {
+        "id": "sys_032",
+        "name": "Tartarus Ring",
+        "coordinates": {
+            "x": -24.0,
+            "y": 15.0,
+            "z": 14.5
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 2,
+        "stellarType": "White Dwarf",
+        "description": "An extensively mined planetary debris ring containing ultra-rare radioactive isotopes."
+    },
+    {
+        "id": "sys_033",
+        "name": "Hesperia",
+        "coordinates": {
+            "x": -17.0,
+            "y": -23.0,
+            "z": -15.3
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K3V (Orange Dwarf)",
+        "description": "Terraced agricultural worlds utilizing highly advanced orbital mirror arrays to maximize crop yields."
+    },
+    {
+        "id": "sys_034",
+        "name": "Prometheus",
+        "coordinates": {
+            "x": 25.0,
+            "y": 18.0,
+            "z": -15.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "G7V (Yellow Dwarf)",
+        "description": "A geologically young world with frequent tectonic shifts, settled for its highly accessible surface minerals."
+    },
+    {
+        "id": "sys_035",
+        "name": "The Maw",
+        "coordinates": {
+            "x": -18.0,
+            "y": -26.0,
+            "z": 14.9
+        },
+        "type": "Scientific Anomaly",
+        "colonyCount": 1,
+        "stellarType": "Micro-Black Hole",
+        "description": "A localized gravitational singularity surrounded by an empire-funded research station studying quantum foam mechanics."
+    },
+    {
+        "id": "sys_036",
+        "name": "Avalon Minor",
+        "coordinates": {
+            "x": 27.0,
+            "y": 20.0,
+            "z": 14.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 2,
+        "stellarType": "K5V (Orange Dwarf)",
+        "description": "Quiet, low-density colony worlds focused on academic research, historical archives, and cybernetics."
+    },
+    {
+        "id": "sys_037",
+        "name": "Cimmeria",
+        "coordinates": {
+            "x": -30.0,
+            "y": -15.0,
+            "z": -14.4
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 1,
+        "stellarType": "M4V (Red Dwarf)",
+        "description": "Perpetually dark mining colony on a tidally locked world, harvesting deep-crust radioactive ores."
+    },
+    {
+        "id": "sys_038",
+        "name": "Osiris",
+        "coordinates": {
+            "x": 20.0,
+            "y": 28.0,
+            "z": 16.0
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 1,
+        "stellarType": "G2V (Yellow Dwarf)",
+        "description": "A scorching desert planet with hab-domes built around deep underground aquifers; major silicon refinery hub."
+    },
+    {
+        "id": "sys_039",
+        "name": "Nirvana",
+        "coordinates": {
+            "x": -22.0,
+            "y": -27.0,
+            "z": 19.1
+        },
+        "type": "Habitable Hub",
+        "colonyCount": 3,
+        "stellarType": "K1V (Orange Dwarf)",
+        "description": "A pristine triple-world paradise system carefully managed to prevent over-industrialization."
+    },
+    {
+        "id": "sys_040",
+        "name": "Gargantua Orbital",
+        "coordinates": {
+            "x": 31.0,
+            "y": 21.0,
+            "z": -15.8
+        },
+        "type": "Industrial/Mining",
+        "colonyCount": 2,
+        "stellarType": "M2V (Red Dwarf)",
+        "description": "A colossal ring-station built around a gas giant to manage a fleet of 500+ automated resource harvesters."
+    },
+    {
+        "id": "sys_041",
+        "name": "Nexus Core",
+        "coordinates": {
+            "x": -35.0,
+            "y": -15.0,
+            "z": 13.0
+        },
+        "type": "Scientific Anomaly",
+        "colonyCount": 1,
+        "stellarType": "Wolf-Rayet Star",
+        "description": "A highly unstable, violent giant star throwing off bizarre isotopic radiation fields at the very edge of imperial space."
+    }
+]

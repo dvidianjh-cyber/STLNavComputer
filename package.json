@@ -1,0 +1,11 @@
+{
+  "name": "stl-nav-computer",
+  "version": "0.1.0",
+  "description": "Ondari Empire STL Navigation Computer — 3D relativistic journey planner",
+  "scripts": {
+    "dev": "npx -y serve . -l 8080"
+  },
+  "keywords": ["three.js", "space", "navigation", "relativity"],
+  "author": "Project Anti-Gravity",
+  "license": "MIT"
+}
