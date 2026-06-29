@@ -152,16 +152,15 @@ export function calculateLeg(gForce, cruiseFraction, distanceLY) {
  * Each leg is treated as an independent rest-to-rest sequence.
  * Layover time (ship at rest) accrues equally in both frames.
  *
- * @param {import('./dataLoader.js').System[]} waypoints   - Ordered stops, minimum 2.
- * @param {number} gForce          - Drive output in Gs.
- * @param {number} maxCruisePercent - Max cruise velocity as a percentage of c.
- * @param {number} layoverDays     - Layover days at each intermediate stop.
+ * @param {import('./dataLoader.js').System[]} waypoints       - Ordered stops, minimum 2.
+ * @param {number}   gForce                                     - Drive output in Gs.
+ * @param {number}   maxCruisePercent                           - Max cruise velocity as a percentage of c.
+ * @param {number[]} layoverYearsArray                          - Layover in years at each waypoint index; indices 0 (origin) and last (destination) are unused.
  * @returns {RouteResult}
  */
-export function calculateRoute(waypoints, gForce, maxCruisePercent, layoverDays) {
+export function calculateRoute(waypoints, gForce, maxCruisePercent, layoverYearsArray) {
     const clampedG       = Math.max(0.1, Math.min(100, gForce));
     const cruiseFraction = Math.max(0.001, Math.min(V_MAX_ABS, maxCruisePercent / 100));
-    const layoverYears   = Math.max(0, layoverDays) / 365.25;
 
     let totalObj = 0;
     let totalSubj = 0;
@@ -180,10 +179,11 @@ export function calculateRoute(waypoints, gForce, maxCruisePercent, layoverDays)
         totalSubj     += leg.tSubj;
         totalDistance += dist;
 
-        // Add layover at all intermediate stops (not at the final destination)
+        // Add layover at each intermediate stop (waypoints[i+1]), not at the final destination
         if (i < waypoints.length - 2) {
-            totalObj  += layoverYears;
-            totalSubj += layoverYears;
+            const layover = Math.max(0, (layoverYearsArray?.[i + 1]) ?? 0);
+            totalObj  += layover;
+            totalSubj += layover;
         }
     }
 

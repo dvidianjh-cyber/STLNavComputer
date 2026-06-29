@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nav-Computer // Ondari Empire</title>
     <meta name="description" content="Ondari Empire STL Navigation Computer — 3D interactive stellar map and relativistic journey planner for the 40 light-year local neighbourhood.">
-    <meta name="theme-color" content="#000a1a">
+    <meta name="theme-color" content="#00060f">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,6 +26,9 @@
 
     <!-- 3D Canvas -->
     <canvas id="starmap-canvas" aria-label="3D interactive stellar map"></canvas>
+
+    <!-- Tether SVG Overlay (z=5: above canvas, below UI panels) -->
+    <svg id="tether-layer" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
 
     <!-- ═══════════════════════════════════════════════════════════
          LOADING OVERLAY
@@ -61,6 +64,7 @@
         <h1 class="panel-heading">
             <span class="heading-icon">⬡</span>
             JOURNEY PLANNER
+            <button id="btn-collapse-planner" class="planner-collapse-btn" title="Collapse/expand panel" aria-label="Toggle journey planner" aria-expanded="true">⌄</button>
         </h1>
 
         <!-- Drive Parameters -->
@@ -86,18 +90,7 @@
             </div>
         </div>
 
-        <div class="param-group">
-            <div class="param-label-row">
-                <span class="param-label">LAYOVER AT EACH STOP</span>
-                <span class="param-range">DAYS</span>
-            </div>
-            <div class="param-input-row">
-                <input type="number" id="layover-input" class="param-input" min="0" step="1" value="0" aria-label="Layover time in days at intermediate stops">
-                <span class="param-unit">DAYS</span>
-            </div>
-        </div>
 
-        <div class="panel-divider"></div>
 
         <!-- Flight Plan -->
         <div class="flight-plan-header">

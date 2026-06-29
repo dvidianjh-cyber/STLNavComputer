@@ -62,6 +62,11 @@ async function bootstrap() {
             onClearRoute: _onClearRoute,
         });
 
+        // 6. Set up tether projection and subscribe to view-change events
+        ui.refreshTethers(renderer.worldToScreen);
+        renderer.getControls().addEventListener('change', () => ui.refreshTethers());
+        window.addEventListener('resize',               () => ui.refreshTethers());
+
         // Done
         ui.setLoading(false);
 
@@ -103,14 +108,14 @@ function _onStarClick(system, screenPos) {
 /**
  * Calculate route — runs physics, renders the route, updates results.
  * @param {{
- *   waypoints:   import('./dataLoader.js').System[],
- *   gForce:      number,
- *   maxCruise:   number,
- *   layoverDays: number
+ *   waypoints:        import('./dataLoader.js').System[],
+ *   gForce:           number,
+ *   maxCruise:        number,
+ *   layoverYearsArray: number[]
  * }} params
  */
-function _onCalculate({ waypoints, gForce, maxCruise, layoverDays }) {
-    state.currentRoute = calculateRoute(waypoints, gForce, maxCruise, layoverDays);
+function _onCalculate({ waypoints, gForce, maxCruise, layoverYearsArray }) {
+    state.currentRoute = calculateRoute(waypoints, gForce, maxCruise, layoverYearsArray);
 
     renderer.drawRoute(state.currentRoute);
     renderer.highlightRouteSystems(waypoints.map(s => s.id));

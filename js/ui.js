@@ -17,7 +17,7 @@ let _callbacks = {};
 
 /**
  * Each entry tracks one stop in the flight plan.
- * @type {Array<{ stopId: string, systemId: string }>}
+ * @type {Array<{ stopId: string, systemId: string, layoverYears: number }>}
  */
 let _stops = [];
 
@@ -28,6 +28,12 @@ const _pinnedCards = new Map();
 
 let _topZIndex = 100;
 
+// ─── Tether State ─────────────────────────────────────────────
+/** Tracks active tether lines: systemId → { line: SVGLineElement, coords: {x,y,z} } */
+const _tethers = new Map();
+/** Coordinate projection function injected from app.js via refreshTethers() */
+let _projectFn = null;
+
 // ─── DOM Accessors ───────────────────────────────────────────────
 // Use functions so they're always fresh (elements created after DOMContentLoaded).
 
@@ -37,11 +43,11 @@ const $count   = ()  => $id('system-count');
 const $stops   = ()  => $id('stops-list');
 const $gForce  = ()  => $id('g-force-input');
 const $cruise  = ()  => $id('cruise-speed-input');
-const $layover = ()  => $id('layover-input');
 const $calcBtn = ()  => $id('btn-calculate');
 const $clearBtn= ()  => $id('btn-clear-route');
 const $tooltip = ()  => $id('hover-tooltip');
 const $cards   = ()  => $id('cards-container');
+const $tether  = ()  => $id('tether-layer');
 
 // ─── Public API ──────────────────────────────────────────────────
 
@@ -74,6 +80,16 @@ export function init(systems, callbacks) {
     $id('btn-add-stop').addEventListener('click', _addIntermediateStop);
     $calcBtn().addEventListener('click', _handleCalculate);
     $clearBtn().addEventListener('click', _handleClear);
+
+    // Wire collapse toggle
+    const collapseBtn = $id('btn-collapse-planner');
+    const planner     = $id('panel-planner');
+    if (collapseBtn && planner) {
+        collapseBtn.addEventListener('click', () => {
+            const collapsed = planner.classList.toggle('is-collapsed');
+            collapseBtn.setAttribute('aria-expanded', String(!collapsed));
+        });
+    }
 
     // Clamp G-force input on blur/change
     $gForce().addEventListener('change', () => {
@@ -135,7 +151,7 @@ export function setLoading(visible) {
  */
 function _appendStop(label, removable) {
     const stopId = `stop-${_stopCounter++}`;
-    _stops.push({ stopId, systemId: '' });
+    _stops.push({ stopId, systemId: '', layoverYears: 0 });
     const el = _buildStopElement(stopId, label, removable);
     $stops().appendChild(el);
     return stopId;
@@ -147,7 +163,7 @@ function _appendStop(label, removable) {
 function _addIntermediateStop() {
     const stopId = `stop-${_stopCounter++}`;
     // Insert into state array before last entry
-    _stops.splice(_stops.length - 1, 0, { stopId, systemId: '' });
+    _stops.splice(_stops.length - 1, 0, { stopId, systemId: '', layoverYears: 0 });
 
     const stopNumber = _stops.length - 2;
     const el         = _buildStopElement(stopId, `STOP ${stopNumber}`, true);
@@ -201,15 +217,46 @@ function _buildStopElement(stopId, label, removable) {
     });
     div.appendChild(select);
 
-    // Remove button (intermediate only)
+    // Remove button (intermediate only) + per-waypoint layover input
     if (removable) {
         const removeBtn       = document.createElement('button');
         removeBtn.className   = 'btn-remove-stop';
         removeBtn.title       = 'Remove this stop';
         removeBtn.textContent = '×';
         removeBtn.setAttribute('aria-label', 'Remove stop');
+        // Stop propagation so the drag handler on the parent card cannot capture this click
+        removeBtn.addEventListener('pointerdown', e => e.stopPropagation());
         removeBtn.addEventListener('click', () => _removeStop(stopId, div));
         div.appendChild(removeBtn);
+
+        // ── Layover sub-row (spans all grid columns) ──
+        const layoverRow = document.createElement('div');
+        layoverRow.className = 'stop-layover-row';
+
+        const layoverLabel       = document.createElement('span');
+        layoverLabel.className   = 'stop-layover-label';
+        layoverLabel.textContent = 'LAYOVER';
+        layoverRow.appendChild(layoverLabel);
+
+        const layoverInput         = document.createElement('input');
+        layoverInput.type          = 'number';
+        layoverInput.className     = 'stop-layover-input';
+        layoverInput.min           = '0';
+        layoverInput.step          = '0.1';
+        layoverInput.value         = '0';
+        layoverInput.setAttribute('aria-label', 'Layover time in years at this stop');
+        layoverInput.addEventListener('change', () => {
+            const entry = _stops.find(s => s.stopId === stopId);
+            if (entry) entry.layoverYears = Math.max(0, parseFloat(layoverInput.value) || 0);
+        });
+        layoverRow.appendChild(layoverInput);
+
+        const layoverUnit       = document.createElement('span');
+        layoverUnit.className   = 'stop-layover-unit';
+        layoverUnit.textContent = 'YRS';
+        layoverRow.appendChild(layoverUnit);
+
+        div.appendChild(layoverRow);
     }
 
     return div;
@@ -268,17 +315,19 @@ export function setStopSystem(stopIndex, systemId) {
  * Reads form values, resolves system objects, and fires the onCalculate callback.
  */
 function _handleCalculate() {
-    const waypointSystems = _stops
-        .map(s => _systems.find(sys => sys.id === s.systemId))
-        .filter(Boolean);
+    // Resolve each stop to its system, preserving layover values in parallel
+    const resolved = _stops
+        .map(s => ({ sys: _systems.find(sys => sys.id === s.systemId), layover: s.layoverYears ?? 0 }))
+        .filter(r => r.sys);
 
-    if (waypointSystems.length < 2) return;
+    if (resolved.length < 2) return;
 
-    const gForce     = parseFloat($gForce().value)  || 1.0;
-    const maxCruise  = parseFloat($cruise().value)   || 99.0;
-    const layoverDays= parseFloat($layover().value)  || 0;
+    const waypointSystems  = resolved.map(r => r.sys);
+    const layoverYearsArray = resolved.map(r => r.layover);
+    const gForce    = parseFloat($gForce().value) || 1.0;
+    const maxCruise = parseFloat($cruise().value) || 99.0;
 
-    _callbacks.onCalculate?.({ waypoints: waypointSystems, gForce, maxCruise, layoverDays });
+    _callbacks.onCalculate?.({ waypoints: waypointSystems, gForce, maxCruise, layoverYearsArray });
 }
 
 /**
@@ -416,16 +465,22 @@ export function pinCard(system, screenPos) {
     card.style.transform = `translate(${x}px, ${y}px)`;
 
     // Close
-    header.querySelector('.card-close').addEventListener('click', () => {
+    const closeBtn = header.querySelector('.card-close');
+    closeBtn.addEventListener('pointerdown', e => e.stopPropagation()); // Bug fix: prevent drag capture
+    closeBtn.addEventListener('click', () => {
+        _destroyTether(system.id);
         card.remove();
         _pinnedCards.delete(system.id);
     });
 
     // Drag from header
-    _makeDraggable(card, header);
+    _makeDraggable(card, header, system.id);
 
     $cards().appendChild(card);
     _pinnedCards.set(system.id, card);
+
+    // Create tether line linking the card to the star
+    _createTether(system.id, system);
 }
 
 /**
@@ -435,7 +490,7 @@ export function pinCard(system, screenPos) {
  * @param {HTMLElement} card    - The card element to move.
  * @param {HTMLElement} handle  - The element that initiates the drag.
  */
-function _makeDraggable(card, handle) {
+function _makeDraggable(card, handle, systemId = null) {
     let dragging = false;
     let startPointerX, startPointerY, startTX, startTY;
 
@@ -449,6 +504,8 @@ function _makeDraggable(card, handle) {
     }
 
     handle.addEventListener('pointerdown', e => {
+        // Don't initiate drag on close-button clicks
+        if (e.target.closest('.card-close')) return;
         dragging     = true;
         startPointerX = e.clientX;
         startPointerY = e.clientY;
@@ -469,6 +526,8 @@ function _makeDraggable(card, handle) {
         const newTX = Math.max(0, Math.min(window.innerWidth  - cardW, startTX + dx));
         const newTY = Math.max(0, Math.min(window.innerHeight - cardH, startTY + dy));
         card.style.transform = `translate(${newTX}px, ${newTY}px)`;
+        // Update tether card-endpoint in real time
+        if (systemId) _updateTetherLine(systemId);
     });
 
     card.addEventListener('pointerup',     () => { dragging = false; });
@@ -521,4 +580,85 @@ export function resetResults() {
  */
 function _typeClass(type) {
     return `tooltip-type-${type.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+}
+
+// ─── Tether System ─────────────────────────────────────────────
+
+/**
+ * Creates an SVG tether line between a pinned card and its origin star.
+ * @param {string} systemId
+ * @param {import('./dataLoader.js').System} system
+ */
+function _createTether(systemId, system) {
+    const svg = $tether();
+    if (!svg) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'tether-line');
+    svg.appendChild(line);
+    _tethers.set(systemId, { line, coords: system.coordinates });
+    _updateTetherLine(systemId);
+}
+
+/**
+ * Removes the SVG tether line for a given system.
+ * @param {string} systemId
+ */
+function _destroyTether(systemId) {
+    const t = _tethers.get(systemId);
+    if (t) {
+        t.line.remove();
+        _tethers.delete(systemId);
+    }
+}
+
+/**
+ * Returns the closest point on the card's bounding rectangle to (starX, starY).
+ * This gives a clean closest-edge anchor for the tether line.
+ * @param {HTMLElement} card
+ * @param {number} starX
+ * @param {number} starY
+ * @returns {{ x: number, y: number }}
+ */
+function _getCardEdgePoint(card, starX, starY) {
+    const t     = card.style.transform;
+    const match = t.match(/translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)/);
+    if (!match) return { x: starX, y: starY };
+    const cardX  = parseFloat(match[1]);
+    const cardY  = parseFloat(match[2]);
+    const cardW  = card.offsetWidth  || 248;
+    const cardH  = card.offsetHeight || 320;
+    // Clamp the star position to the card rect — gives the nearest edge point
+    const cx = Math.max(cardX, Math.min(cardX + cardW, starX));
+    const cy = Math.max(cardY, Math.min(cardY + cardH, starY));
+    return { x: cx, y: cy };
+}
+
+/**
+ * Redraws the tether line for a single system using the stored star coords
+ * and the current card position.
+ * @param {string} systemId
+ */
+function _updateTetherLine(systemId) {
+    const tether = _tethers.get(systemId);
+    const card   = _pinnedCards.get(systemId);
+    if (!tether || !card || !_projectFn) return;
+
+    const sp        = _projectFn(tether.coords);
+    const edgePoint = _getCardEdgePoint(card, sp.x, sp.y);
+
+    tether.line.setAttribute('x1', sp.x);
+    tether.line.setAttribute('y1', sp.y);
+    tether.line.setAttribute('x2', edgePoint.x);
+    tether.line.setAttribute('y2', edgePoint.y);
+}
+
+/**
+ * Sets the coordinate projection function and refreshes all active tether lines.
+ * Called once at init (with projectFn) and on every orbit/resize event (no arg).
+ * @param {((coords: {x:number,y:number,z:number}) => {x:number,y:number}) | undefined} projectFn
+ */
+export function refreshTethers(projectFn) {
+    if (projectFn) _projectFn = projectFn;
+    if (!_projectFn) return;
+    _tethers.forEach((_, systemId) => _updateTetherLine(systemId));
 }

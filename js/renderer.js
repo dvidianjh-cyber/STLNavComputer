@@ -6,10 +6,12 @@
  */
 
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { OrbitControls }    from 'three/addons/controls/OrbitControls.js';
+import { Line2 }            from 'three/addons/lines/Line2.js';
+import { LineMaterial }     from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry }     from 'three/addons/lines/LineGeometry.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { formatTime }       from './physics.js';
 
 // ─── Constants ──────────────────────────────────────────────────
 
@@ -50,10 +52,14 @@ let starMeshes = [];
 let routeObjects = [];
 /** @type {LineMaterial[]} */
 let lineMaterials = [];
+/** @type {CSS2DObject[]} */
+let css2dObjects = [];
 /** @type {boolean} */
 let needsRender = true;
 /** @type {THREE.WebGLRenderer} */
 let _renderer;
+/** @type {CSS2DRenderer} */
+let css2dRenderer;
 
 // ─── Public API ──────────────────────────────────────────────────
 
@@ -71,7 +77,7 @@ export function markDirty() {
 export function initScene(canvas) {
     // Scene
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000a1a, 0.0045);
+    scene.fog = new THREE.FogExp2(0x00060f, 0.0045);
 
     // Camera
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 600);
@@ -82,7 +88,7 @@ export function initScene(canvas) {
     _renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     _renderer.setSize(window.innerWidth, window.innerHeight);
     _renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    _renderer.setClearColor(0x000a1a, 1);
+    _renderer.setClearColor(0x00060f, 1);
 
     // OrbitControls
     controls = new OrbitControls(camera, _renderer.domElement);
@@ -104,6 +110,18 @@ export function initScene(canvas) {
     scene.add(starGroup);
     scene.add(routeGroup);
 
+    // CSS2D Renderer — for leg-time labels anchored to 3D space
+    css2dRenderer = new CSS2DRenderer();
+    css2dRenderer.setSize(window.innerWidth, window.innerHeight);
+    Object.assign(css2dRenderer.domElement.style, {
+        position:      'fixed',
+        top:           '0',
+        left:          '0',
+        pointerEvents: 'none',
+        zIndex:        '5',
+    });
+    document.body.appendChild(css2dRenderer.domElement);
+
     // Background & grid
     scene.add(_buildStarfield());
     scene.add(_buildGrid());
@@ -122,10 +140,29 @@ export function initScene(canvas) {
 export function getCamera() { return camera; }
 
 /**
+ * Returns the active OrbitControls instance.
+ * @returns {OrbitControls}
+ */
+export function getControls() { return controls; }
+
+/**
  * Returns the active Three.js WebGLRenderer.
  * @returns {THREE.WebGLRenderer}
  */
 export function getRendererInstance() { return _renderer; }
+
+/**
+ * Projects a 3D world-space coordinate into 2D screen coordinates.
+ * @param {{ x: number, y: number, z: number }} coords
+ * @returns {{ x: number, y: number }}
+ */
+export function worldToScreen(coords) {
+    const v = new THREE.Vector3(coords.x, coords.y, coords.z).project(camera);
+    return {
+        x: Math.round((v.x + 1) / 2 * window.innerWidth),
+        y: Math.round((-v.y + 1) / 2 * window.innerHeight),
+    };
+}
 
 /**
  * Creates star meshes for all systems and adds them to the scene.
@@ -263,6 +300,24 @@ export function drawRoute(routeResult) {
 
             fractionSoFar = endFraction;
         });
+
+        // ── Leg-time label at 3D midpoint ────────────────────────
+        if (leg.legDistance > 0) {
+            const mid = new THREE.Vector3(
+                (leg.from.coordinates.x + leg.to.coordinates.x) / 2,
+                (leg.from.coordinates.y + leg.to.coordinates.y) / 2,
+                (leg.from.coordinates.z + leg.to.coordinates.z) / 2,
+            );
+            const time     = formatTime(leg.tSubj);
+            const labelEl  = document.createElement('div');
+            labelEl.className   = 'leg-label';
+            labelEl.textContent = `${time.value} ${time.unit}`;
+
+            const labelObj = new CSS2DObject(labelEl);
+            labelObj.position.copy(mid);
+            routeGroup.add(labelObj);
+            css2dObjects.push(labelObj);
+        }
     });
 
     markDirty();
@@ -277,8 +332,10 @@ export function clearRoute() {
         if (obj.geometry) obj.geometry.dispose();
     });
     lineMaterials.forEach(m => m.dispose());
+    css2dObjects.forEach(obj => routeGroup.remove(obj));
     routeObjects  = [];
     lineMaterials = [];
+    css2dObjects  = [];
     markDirty();
 }
 
@@ -295,7 +352,7 @@ function _buildStarfield() {
     cvs.height = 1024;
     const ctx = cvs.getContext('2d');
 
-    ctx.fillStyle = '#000a1a';
+    ctx.fillStyle = '#00060f';
     ctx.fillRect(0, 0, cvs.width, cvs.height);
 
     for (let i = 0; i < 7000; i++) {
@@ -346,6 +403,7 @@ function _handleResize() {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     _renderer.setSize(w, h);
+    css2dRenderer.setSize(w, h);
     lineMaterials.forEach(m => m.resolution.set(w, h));
     markDirty();
 }
@@ -360,6 +418,7 @@ function _startLoop() {
         controls.update(); // Required for inertia/damping
         if (needsRender) {
             _renderer.render(scene, camera);
+            css2dRenderer.render(scene, camera);
             needsRender = false;
         }
     }

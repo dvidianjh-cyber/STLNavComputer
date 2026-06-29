@@ -7,9 +7,9 @@
 /* ─── Design Tokens ────────────────────────────────────────────── */
 :root {
     /* Colours */
-    --col-bg:           #000a1a;
-    --col-surface:      rgba(4, 14, 35, 0.80);
-    --col-surface-deep: rgba(2, 8, 22, 0.92);
+    --col-bg:           #00060f;
+    --col-surface:      rgba(2, 9, 22, 0.85);
+    --col-surface-deep: rgba(1, 5, 15, 0.94);
     --col-border:       rgba(0, 212, 255, 0.22);
     --col-border-hover: rgba(0, 212, 255, 0.55);
     --col-glow:         rgba(0, 212, 255, 0.18);
@@ -19,8 +19,8 @@
     --col-purple:  #ce93d8;
     --col-green:   #39ff14;
     --col-red:     #ff6b35;
-    --col-white:   #e8f4ff;
-    --col-muted:   rgba(180, 210, 255, 0.45);
+    --col-white:   #f5faff;
+    --col-muted:   rgba(190, 218, 255, 0.62);
 
     /* Star / Route colours */
     --col-habitable:  #4fc3f7;
@@ -66,6 +66,24 @@ html, body {
     height: 100vh !important;
     z-index: var(--z-canvas);
     display: block;
+}
+
+/* ─── Tether SVG Overlay ─────────────────────────────────── */
+#tether-layer {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5; /* above canvas (0), below panels (10) */
+    overflow: visible;
+}
+
+.tether-line {
+    stroke: rgba(0, 212, 255, 0.38);
+    stroke-width: 1;
+    stroke-dasharray: 5 4;
+    stroke-linecap: round;
 }
 
 /* ─── Shared Glass Panel ────────────────────────────────────────── */
@@ -217,6 +235,7 @@ html, body {
 .panel-heading {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
     font-size: 0.9rem;
     font-weight: 700;
@@ -228,6 +247,34 @@ html, body {
 }
 
 .heading-icon { font-size: 0.75rem; opacity: 0.7; }
+
+/* ── Collapse Toggle Button ── */
+.planner-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--col-cyan);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.1rem;
+    opacity: 0.55;
+    transition: opacity 0.2s, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.planner-collapse-btn:hover { opacity: 1; }
+
+/* ── Collapsed State ── */
+.panel-planner {
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel-planner.is-collapsed {
+    max-height: 3.6rem;
+    overflow: hidden;
+}
+.panel-planner.is-collapsed .planner-collapse-btn {
+    transform: rotate(180deg);
+}
 
 /* ── Parameter Inputs ── */
 .param-group { display: flex; flex-direction: column; gap: 0.3rem; }
@@ -379,6 +426,56 @@ html, body {
 .btn-remove-stop:hover {
     background: rgba(255, 107, 53, 0.28);
     border-color: var(--col-red);
+}
+
+/* ── Per-waypoint Layover Sub-row ── */
+.stop-layover-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0 0.1rem;
+    border-top: 1px solid rgba(0, 212, 255, 0.08);
+    margin-top: 0.05rem;
+}
+
+.stop-layover-label {
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: rgba(190, 218, 255, 0.42);
+    text-transform: uppercase;
+    white-space: nowrap;
+    min-width: 52px;
+}
+
+.stop-layover-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(0, 212, 255, 0.13);
+    border-radius: 3px;
+    color: var(--col-white);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.14rem 0.4rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 0;
+}
+.stop-layover-input:focus {
+    border-color: rgba(0, 212, 255, 0.4);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.08);
+}
+.stop-layover-input::-webkit-inner-spin-button,
+.stop-layover-input::-webkit-outer-spin-button { opacity: 0.3; }
+
+.stop-layover-unit {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    color: var(--col-cyan);
+    opacity: 0.6;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
 }
 
 /* Stop item without remove button */
@@ -873,4 +970,22 @@ html, body {
 
 @media (max-width: 700px) {
     .version-badge { bottom: 80px; }
+}
+
+/* ═══ FLIGHT PLAN LEG LABELS (CSS2DRenderer) ═══════════════════ */
+.leg-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: #f5faff;
+    background: rgba(0, 6, 15, 0.80);
+    border: 1px solid rgba(0, 212, 255, 0.22);
+    border-radius: 3px;
+    padding: 0.12rem 0.38rem;
+    pointer-events: none;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.45);
+    transform: translateY(-14px); /* offset above the trajectory line */
+    user-select: none;
 }
