@@ -1,8 +1,9 @@
 /**
  * @file ui.js
- * @description All DOM manipulation: journey planner, results, hover tooltips, pinned cards.
+ * @description All DOM manipulation: journey planner, results, hover tooltips, pinned cards,
+ *              current-system panel, dynamic map key with label toggles.
  * @module ui
- * Last Modified: 2026-06-28
+ * Last Modified: 2026-06-30 (v0.2.0)
  */
 
 import { formatTime } from './physics.js';
@@ -12,7 +13,7 @@ import { formatTime } from './physics.js';
 /** @type {import('./dataLoader.js').System[]} */
 let _systems = [];
 
-/** @type {{ onCalculate: Function, onClearRoute: Function }} */
+/** @type {{ onCalculate: Function, onClearRoute: Function, onSystemSelect: Function, onLabelToggle: Function, onCenterView: Function }} */
 let _callbacks = {};
 
 /**
@@ -39,7 +40,6 @@ let _projectFn = null;
 
 const $id      = id  => document.getElementById(id);
 const $overlay = ()  => $id('loading-overlay');
-const $count   = ()  => $id('system-count');
 const $stops   = ()  => $id('stops-list');
 const $gForce  = ()  => $id('g-force-input');
 const $cruise  = ()  => $id('cruise-speed-input');
@@ -55,11 +55,15 @@ const $tether  = ()  => $id('tether-layer');
  * Initialises the UI with loaded systems and wires up all event listeners.
  * @param {import('./dataLoader.js').System[]} systems
  * @param {{
- *   onCalculate:  (params: object) => void,
- *   onClearRoute: () => void
+ *   onCalculate:    (params: object) => void,
+ *   onClearRoute:   () => void,
+ *   onSystemSelect: (system: object) => void,
+ *   onLabelToggle:  (type: string, visible: boolean) => void,
+ *   onCenterView:   () => void,
  * }} callbacks
+ * @param {import('./dataLoader.js').System | null} initialSystem
  */
-export function init(systems, callbacks) {
+export function init(systems, callbacks, initialSystem = null) {
     _systems   = systems;
     _callbacks = callbacks;
 
@@ -76,26 +80,47 @@ export function init(systems, callbacks) {
     _appendStop('ORIGIN',      false);
     _appendStop('DESTINATION', false);
 
-    // Wire up buttons
+    // Wire up journey planner buttons
     $id('btn-add-stop').addEventListener('click', _addIntermediateStop);
     $calcBtn().addEventListener('click', _handleCalculate);
     $clearBtn().addEventListener('click', _handleClear);
 
-    // Wire collapse toggle
+    // Journey Planner collapse (default: collapsed — aria-expanded="false" on init)
     const collapseBtn = $id('btn-collapse-planner');
     const planner     = $id('panel-planner');
     if (collapseBtn && planner) {
+        // Initialise as collapsed
+        planner.classList.add('is-collapsed');
+        collapseBtn.setAttribute('aria-expanded', 'false');
+
         collapseBtn.addEventListener('click', () => {
             const collapsed = planner.classList.toggle('is-collapsed');
             collapseBtn.setAttribute('aria-expanded', String(!collapsed));
         });
     }
 
-    // Clamp G-force input on blur/change
-    $gForce().addEventListener('change', () => {
-        const v = parseFloat($gForce().value);
-        $gForce().value = Math.max(0.1, Math.min(100, isNaN(v) ? 1.0 : v)).toFixed(1);
-    });
+    // Map Key collapse
+    const legendCollapseBtn = $id('btn-collapse-legend');
+    const legendItems       = $id('legend-items');
+    if (legendCollapseBtn && legendItems) {
+        legendCollapseBtn.setAttribute('aria-expanded', 'true');
+        legendCollapseBtn.addEventListener('click', () => {
+            const legend = $id('panel-legend');
+            const collapsed = legend.classList.toggle('is-collapsed');
+            legendCollapseBtn.setAttribute('aria-expanded', String(!collapsed));
+        });
+    }
+
+    // Slider: Drive Output — live display
+    const gForceSlider  = $gForce();
+    const gForceDisplay = $id('g-force-display');
+    if (gForceSlider && gForceDisplay) {
+        const _updateGDisplay = () => {
+            gForceDisplay.textContent = `${parseFloat(gForceSlider.value).toFixed(1)} G`;
+        };
+        gForceSlider.addEventListener('input', _updateGDisplay);
+        _updateGDisplay();
+    }
 
     // Clamp cruise input on blur/change
     $cruise().addEventListener('change', () => {
@@ -103,22 +128,33 @@ export function init(systems, callbacks) {
         $cruise().value = Math.max(0.1, Math.min(99.99999, isNaN(v) ? 99.0 : v)).toFixed(3);
     });
 
-    setSystemCount(systems.length);
+    // Current System dropdown
+    _initCurrentSystemDropdown(systems, initialSystem);
+
+    // Map Key — dynamic system type list with label toggles
+    _initMapKey(systems);
 }
 
 /**
- * Updates the charted-system count badge in the header.
- * @param {number} n
+ * Sets the map name and description in the header.
+ * Replaces the hardcoded "STL NAVIGATION SYSTEM" and "X SYSTEMS CHARTED" labels.
+ * @param {string} mapName
+ * @param {string} mapDescription
  */
-export function setSystemCount(n) {
-    const el = $count();
-    if (el) el.textContent = n;
+export function setMapMeta(mapName, mapDescription) {
+    const sub = $id('header-sub');
+    if (sub) sub.textContent = mapName;
+
+    const badge = $id('header-badge');
+    if (badge) {
+        badge.innerHTML = `<span class="badge-dot"></span>${mapDescription}`;
+    }
 }
 
 /**
  * Sets the version badge text in the bottom-right corner.
  * Version is read from package.json at runtime — no duplicate constants.
- * @param {string} version - e.g. "0.1.1"
+ * @param {string} version - e.g. "0.2.0"
  */
 export function setVersion(version) {
     const el = $id('version-badge');
@@ -139,6 +175,91 @@ export function setLoading(visible) {
         overlay.style.opacity        = '0';
         overlay.style.pointerEvents  = 'none';
     }
+}
+
+// ─── Current System Panel ────────────────────────────────────────
+
+/**
+ * Populates the "Current System" dropdown and wires up events.
+ * @param {import('./dataLoader.js').System[]} systems
+ * @param {import('./dataLoader.js').System | null} initialSystem
+ */
+function _initCurrentSystemDropdown(systems, initialSystem) {
+    const select = $id('current-system-select');
+    if (!select) return;
+
+    systems.forEach(sys => {
+        const opt       = document.createElement('option');
+        opt.value       = sys.id;
+        opt.textContent = sys.name;
+        select.appendChild(opt);
+    });
+
+    if (initialSystem) select.value = initialSystem.id;
+
+    select.addEventListener('change', () => {
+        const system = _systems.find(s => s.id === select.value);
+        if (system) _callbacks.onSystemSelect?.(system);
+    });
+
+    const centerBtn = $id('btn-center-view');
+    if (centerBtn) {
+        centerBtn.addEventListener('click', () => _callbacks.onCenterView?.());
+    }
+}
+
+// ─── Map Key ─────────────────────────────────────────────────────
+
+/**
+ * Builds the dynamic Map Key section from loaded system types.
+ * Generates one row per unique type with a dot, label, and visibility toggle.
+ * @param {import('./dataLoader.js').System[]} systems
+ */
+function _initMapKey(systems) {
+    const container = $id('legend-items');
+    if (!container) return;
+
+    // Derive unique types in insertion order
+    const uniqueTypes = [...new Set(systems.map(s => s.type))];
+
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className   = 'legend-section-title';
+    sectionTitle.textContent = 'SYSTEM TYPE';
+    container.appendChild(sectionTitle);
+
+    uniqueTypes.forEach(type => {
+        const row = document.createElement('div');
+        row.className = 'legend-row legend-toggle-row';
+
+        // Colour dot
+        const dot = document.createElement('span');
+        dot.className = `legend-dot ${_typeDotClass(type)}`;
+        row.appendChild(dot);
+
+        // Label text
+        const label = document.createElement('span');
+        label.className   = 'legend-text';
+        label.textContent = type;
+        row.appendChild(label);
+
+        // Visibility toggle checkbox
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'legend-toggle-label';
+        toggleLabel.title     = `Toggle ${type} system labels`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type    = 'checkbox';
+        checkbox.checked = true;
+        checkbox.className = 'legend-toggle-checkbox';
+        checkbox.setAttribute('aria-label', `Show labels for ${type} systems`);
+        checkbox.addEventListener('change', () => {
+            _callbacks.onLabelToggle?.(type, checkbox.checked);
+        });
+
+        toggleLabel.appendChild(checkbox);
+        row.appendChild(toggleLabel);
+        container.appendChild(row);
+    });
 }
 
 // ─── Stops List ─────────────────────────────────────────────────
@@ -322,7 +443,7 @@ function _handleCalculate() {
 
     if (resolved.length < 2) return;
 
-    const waypointSystems  = resolved.map(r => r.sys);
+    const waypointSystems   = resolved.map(r => r.sys);
     const layoverYearsArray = resolved.map(r => r.layover);
     const gForce    = parseFloat($gForce().value) || 1.0;
     const maxCruise = parseFloat($cruise().value) || 99.0;
@@ -393,6 +514,7 @@ export function hideHoverCard() {
 /**
  * Creates and displays a draggable, pinned system info card.
  * If the system is already pinned, brings the existing card to the front.
+ * Flash bug fix: card is injected hidden, positioned, then faded in.
  *
  * @param {import('./dataLoader.js').System} system
  * @param {{ x: number, y: number }} screenPos
@@ -409,16 +531,18 @@ export function pinCard(system, screenPos) {
     card.dataset.systemId = system.id;
     card.style.zIndex     = ++_topZIndex;
 
+    // Flash bug fix: start invisible, fade in after positioning
+    card.style.opacity = '0';
+
     const typeClass  = _typeClass(system.type);
     const colonyWord = system.colonyCount === 1 ? 'COLONY' : 'COLONIES';
 
-    // Build card DOM
+    // Build card DOM — id field removed per v0.2.0 spec
     const header = document.createElement('div');
     header.className = 'card-header';
     header.innerHTML = `
         <div class="card-title-group">
             <span class="card-name">${system.name}</span>
-            <span class="card-id">${system.id}</span>
         </div>
         <button class="card-close" title="Close card" aria-label="Close">×</button>
     `;
@@ -457,12 +581,18 @@ export function pinCard(system, screenPos) {
     actions.append(btnOrigin, btnDest);
     card.append(header, body, actions);
 
-    // Initial position — constrained to viewport
+    // Calculate initial position before appending — constrained to viewport
     const CARD_W = 248;
     const CARD_H = 320;
     const x      = Math.max(0, Math.min(screenPos.x + 20, window.innerWidth  - CARD_W));
     const y      = Math.max(0, Math.min(screenPos.y,       window.innerHeight - CARD_H));
     card.style.transform = `translate(${x}px, ${y}px)`;
+
+    // Append to DOM, then fade in on next animation frame (fixes flash bug)
+    $cards().appendChild(card);
+    requestAnimationFrame(() => {
+        card.style.opacity = '1';
+    });
 
     // Close
     const closeBtn = header.querySelector('.card-close');
@@ -476,7 +606,6 @@ export function pinCard(system, screenPos) {
     // Drag from header
     _makeDraggable(card, header, system.id);
 
-    $cards().appendChild(card);
     _pinnedCards.set(system.id, card);
 
     // Create tether line linking the card to the star
@@ -580,6 +709,15 @@ export function resetResults() {
  */
 function _typeClass(type) {
     return `tooltip-type-${type.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+}
+
+/**
+ * Maps a system type string to a legend dot CSS class.
+ * @param {string} type
+ * @returns {string}
+ */
+function _typeDotClass(type) {
+    return `dot-${type.toLowerCase().replace(/[^a-z]+/g, '-')}`;
 }
 
 // ─── Tether System ─────────────────────────────────────────────

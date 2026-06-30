@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<!-- Last Modified: 2026-06-28 | v0.1.0 -->
+<!-- Last Modified: 2026-06-30 | v0.2.0 -->
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nav-Computer // Ondari Empire</title>
-    <meta name="description" content="Ondari Empire STL Navigation Computer — 3D interactive stellar map and relativistic journey planner for the 40 light-year local neighbourhood.">
+    <meta name="description"
+        content="Ondari Empire STL Navigation Computer — 3D interactive stellar map and relativistic journey planner for the local stellar neighbourhood.">
     <meta name="theme-color" content="#00060f">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <script type="importmap">
@@ -22,6 +26,7 @@
     }
     </script>
 </head>
+
 <body>
 
     <!-- 3D Canvas -->
@@ -50,12 +55,26 @@
     ═══════════════════════════════════════════════════════════ -->
     <header class="ui-panel panel-header" id="panel-header" aria-label="Application title">
         <div class="header-title">NAV-COMPUTER</div>
-        <div class="header-sub">ONDARI EMPIRE // STL NAVIGATION SYSTEM</div>
-        <div class="header-badge">
+        <div class="header-sub" id="header-sub">STL NAVIGATION SYSTEM</div>
+        <div class="header-badge" id="header-badge">
             <span class="badge-dot"></span>
             <span id="system-count">0</span> SYSTEMS CHARTED
         </div>
     </header>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CURRENT SYSTEM — TOP CENTRE
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="ui-panel panel-current-system" id="panel-current-system" aria-label="Current selected system">
+        <span class="current-system-label">CURRENT SYSTEM</span>
+        <select id="current-system-select" class="current-system-select" aria-label="Select system to highlight">
+            <!-- Populated by ui.js -->
+        </select>
+        <button id="btn-center-view" class="btn-center-view" title="Centre view on selected system"
+            aria-label="Centre view on selected system">
+            <span class="center-view-icon">⊕</span>
+        </button>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════
          JOURNEY PLANNER — RIGHT PANEL
@@ -64,38 +83,45 @@
         <h1 class="panel-heading">
             <span class="heading-icon">⬡</span>
             JOURNEY PLANNER
-            <button id="btn-collapse-planner" class="planner-collapse-btn" title="Collapse/expand panel" aria-label="Toggle journey planner" aria-expanded="true">⌄</button>
+            <button id="btn-collapse-planner" class="planner-collapse-btn" title="Collapse/expand panel"
+                aria-label="Toggle journey planner" aria-expanded="false">⌄</button>
         </h1>
 
-        <!-- Drive Parameters -->
+        <!-- Drive Parameters — dual row (slider 70% + cruise 30%) -->
         <div class="param-group">
-            <div class="param-label-row">
-                <span class="param-label">DRIVE OUTPUT</span>
-                <span class="param-range">0.1 – 100 G</span>
-            </div>
-            <div class="param-input-row">
-                <input type="number" id="g-force-input" class="param-input" min="0.1" max="100" step="0.1" value="1.0" aria-label="Drive output in Gs">
-                <span class="param-unit">G</span>
+            <div class="param-dual-row">
+                <!-- Drive Output Slider (70%) -->
+                <div class="param-sub-group param-sub-wide">
+                    <div class="param-label-row">
+                        <span class="param-label">DRIVE OUTPUT</span>
+                        <span class="param-range">0.1 – 10 G</span>
+                    </div>
+                    <div class="param-input-row param-slider-row">
+                        <input type="range" id="g-force-input" class="param-slider" min="0.1" max="10" step="0.1"
+                            value="1.0" aria-label="Drive output in Gs">
+                        <span class="param-slider-value" id="g-force-display">1.0 G</span>
+                    </div>
+                </div>
+                <!-- Max Cruise Velocity (30%) -->
+                <div class="param-sub-group param-sub-narrow">
+                    <div class="param-label-row">
+                        <span class="param-label">CRUISE</span>
+                        <span class="param-range">% c</span>
+                    </div>
+                    <div class="param-input-row">
+                        <input type="number" id="cruise-speed-input" class="param-input param-input-compact"
+                            min="0.1" max="99.99999" step="0.1" value="99.0"
+                            aria-label="Max cruise velocity as percent of c">
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="param-group">
-            <div class="param-label-row">
-                <span class="param-label">MAX CRUISE VELOCITY</span>
-                <span class="param-range">0.1 – 99.99999%</span>
-            </div>
-            <div class="param-input-row">
-                <input type="number" id="cruise-speed-input" class="param-input" min="0.1" max="99.99999" step="0.1" value="99.0" aria-label="Max cruise velocity as percent of c">
-                <span class="param-unit">% c</span>
-            </div>
-        </div>
-
-
 
         <!-- Flight Plan -->
         <div class="flight-plan-header">
             <span class="param-label">FLIGHT PLAN</span>
-            <button id="btn-add-stop" class="btn-add-stop" title="Add an intermediate waypoint" aria-label="Add intermediate stop">
+            <button id="btn-add-stop" class="btn-add-stop" title="Add an intermediate waypoint"
+                aria-label="Add intermediate stop">
                 + ADD STOP
             </button>
         </div>
@@ -158,21 +184,17 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════
-         LEGEND — BOTTOM LEFT
+         MAP KEY — BOTTOM LEFT
     ═══════════════════════════════════════════════════════════ -->
-    <div class="ui-panel panel-legend" id="panel-legend" aria-label="Map legend">
-        <div class="legend-section-title">SYSTEM TYPE</div>
-        <div class="legend-row">
-            <span class="legend-dot dot-habitable"></span>
-            <span class="legend-text">Habitable Hub</span>
+    <div class="ui-panel panel-legend" id="panel-legend" aria-label="Map key">
+        <div class="legend-header">
+            <div class="legend-section-title">MAP KEY</div>
+            <button id="btn-collapse-legend" class="planner-collapse-btn legend-collapse-btn"
+                title="Collapse/expand map key" aria-label="Toggle map key" aria-expanded="true">⌄</button>
         </div>
-        <div class="legend-row">
-            <span class="legend-dot dot-industrial"></span>
-            <span class="legend-text">Industrial / Mining</span>
-        </div>
-        <div class="legend-row">
-            <span class="legend-dot dot-anomaly"></span>
-            <span class="legend-text">Scientific Anomaly</span>
+
+        <div id="legend-items" class="legend-items">
+            <!-- Populated dynamically by ui.js from loaded system types -->
         </div>
 
         <div class="legend-divider"></div>
@@ -203,4 +225,5 @@
 
     <script type="module" src="./js/app.js"></script>
 </body>
+
 </html>

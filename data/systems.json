@@ -1,7 +1,10 @@
-[
+{
+    "map_name": "Ondari Empire Local Space",
+    "map_description": "Standard exploratory stellar neighbourhood — 56 systems charted",
+    "systems": [
     {
         "id": "sys_001",
-        "name": "Aethelgard Prime",
+        "name": "Ondari Prime",
         "coordinates": {
             "x": 0.0,
             "y": 0.0,
@@ -531,5 +534,201 @@
         "colonyCount": 1,
         "stellarType": "Wolf-Rayet Star",
         "description": "A highly unstable, violent giant star throwing off bizarre isotopic radiation fields at the very edge of imperial space."
+    },
+    {
+        "id": "sys_042",
+        "name": "Gliese-881",
+        "coordinates": {
+            "x": 55.0,
+            "y": 30.0,
+            "z": -15.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "M3V (Red Dwarf)",
+        "description": "Unexplored system. Long-range telemetry indicates 0 habitable planets."
+    },
+    {
+        "id": "sys_043",
+        "name": "Kepler Sector 4A",
+        "coordinates": {
+            "x": -40.0,
+            "y": -60.0,
+            "z": 20.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "G2V (Yellow Dwarf)",
+        "description": "Unexplored system. Spectroscopic analysis indicates 2 potentially habitable planets."
+    },
+    {
+        "id": "sys_044",
+        "name": "HD-10934",
+        "coordinates": {
+            "x": 10.0,
+            "y": 80.0,
+            "z": 45.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "K4V (Orange Dwarf)",
+        "description": "Unexplored system. Deep-space scans reveal 1 habitable candidate."
+    },
+    {
+        "id": "sys_045",
+        "name": "Vela Minor",
+        "coordinates": {
+            "x": -75.0,
+            "y": 15.0,
+            "z": -35.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "F7V (Yellow-White Dwarf)",
+        "description": "Unexplored system. High radiation environment with 0 habitable planets."
+    },
+    {
+        "id": "sys_046",
+        "name": "Outpost Omega-9",
+        "coordinates": {
+            "x": 65.0,
+            "y": -50.0,
+            "z": 50.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "M1V (Red Dwarf)",
+        "description": "Unexplored system. Automated probes detect 1 marginally habitable world."
+    },
+    {
+        "id": "sys_047",
+        "name": "LHS-292",
+        "coordinates": {
+            "x": -20.0,
+            "y": -85.0,
+            "z": -40.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "White Dwarf",
+        "description": "Unexplored system. Stellar remnant surrounded by debris. 0 habitable planets."
+    },
+    {
+        "id": "sys_048",
+        "name": "Eridani Traverse",
+        "coordinates": {
+            "x": 90.0,
+            "y": 10.0,
+            "z": -20.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "G5V (Yellow Dwarf)",
+        "description": "Unexplored system. Promising data implies 3 habitable candidate worlds."
+    },
+    {
+        "id": "sys_049",
+        "name": "Wolf 1061 Edge",
+        "coordinates": {
+            "x": -35.0,
+            "y": 45.0,
+            "z": -60.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "K1V (Orange Dwarf)",
+        "description": "Unexplored system. Initial scans show 1 terrestrial planet in the habitable zone."
+    },
+    {
+        "id": "sys_050",
+        "name": "Centauri Reach",
+        "coordinates": {
+            "x": 50.0,
+            "y": 65.0,
+            "z": 30.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "M5V (Red Dwarf)",
+        "description": "Unexplored system. Tidally locked worlds detected; 0 currently classified as habitable."
+    },
+    {
+        "id": "sys_051",
+        "name": "Trappist Terminus",
+        "coordinates": {
+            "x": -95.0,
+            "y": -5.0,
+            "z": 15.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "M8V (Ultra-cool Dwarf)",
+        "description": "Unexplored system. Packed orbital resonance with 4 potentially habitable planets."
+    },
+    {
+        "id": "sys_052",
+        "name": "Cygnus Void",
+        "coordinates": {
+            "x": 25.0,
+            "y": -70.0,
+            "z": -65.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "B8V (Blue-White Main Sequence)",
+        "description": "Unexplored system. High-energy young star. 0 habitable planets."
+    },
+    {
+        "id": "sys_053",
+        "name": "Tauri-7",
+        "coordinates": {
+            "x": -60.0,
+            "y": -35.0,
+            "z": 75.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "G8V (Yellow Dwarf)",
+        "description": "Unexplored system. Long-range telemetry indicates 2 habitable planets."
+    },
+    {
+        "id": "sys_054",
+        "name": "Sirius Deep",
+        "coordinates": {
+            "x": 80.0,
+            "y": -40.0,
+            "z": -30.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "A1V (White Main Sequence)",
+        "description": "Unexplored binary system. Massive astrometric wobble detected. 0 habitable planets."
+    },
+    {
+        "id": "sys_055",
+        "name": "Altair Boundary",
+        "coordinates": {
+            "x": -45.0,
+            "y": 75.0,
+            "z": 50.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "K7V (Orange Dwarf)",
+        "description": "Unexplored system. Atmospheric signatures suggest 1 highly habitable ocean world."
+    },
+    {
+        "id": "sys_056",
+        "name": "Zenith-Prime",
+        "coordinates": {
+            "x": 5.0,
+            "y": 95.0,
+            "z": -10.0
+        },
+        "type": "Unexplored",
+        "colonyCount": 0,
+        "stellarType": "G0V (Yellow Dwarf)",
+        "description": "Unexplored system. Sensor ghosts indicate 1 potential habitable planet in a highly eccentric orbit."
     }
-]
+    ]
+}

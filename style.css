@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
-   style.css — Project Anti-Gravity Nav-Computer v0.1.0
+   style.css — Project Anti-Gravity Nav-Computer v0.2.0
    Theme: Futuristic Glassmorphism HUD
-   Last Modified: 2026-06-28
+   Last Modified: 2026-06-30
 ═══════════════════════════════════════════════════════════════════ */
 
 /* ─── Design Tokens ────────────────────────────────────────────── */
@@ -26,6 +26,7 @@
     --col-habitable:  #4fc3f7;
     --col-industrial: #ffa726;
     --col-anomaly:    #ce93d8;
+    --col-unexplored: #888899;
     --col-route-acc:  #ff6b35;
     --col-route-cru:  #00d4ff;
 
@@ -213,6 +214,73 @@ html, body {
     50%       { opacity: 0.5; box-shadow: 0 0 3px var(--col-green); }
 }
 
+/* ═══ CURRENT SYSTEM PANEL ══════════════════════════════════════ */
+.panel-current-system {
+    top: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 1rem;
+    white-space: nowrap;
+    z-index: var(--z-panels);
+}
+
+.current-system-label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--col-muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.current-system-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--col-border);
+    border-radius: 4px;
+    color: var(--col-white);
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.7rem 0.3rem 0.5rem;
+    outline: none;
+    cursor: pointer;
+    min-width: 180px;
+    max-width: 260px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.current-system-select:focus {
+    border-color: var(--col-border-hover);
+    box-shadow: 0 0 0 2px var(--col-glow);
+}
+.current-system-select option { background: #0a1a30; color: var(--col-white); }
+
+.btn-center-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--col-border);
+    border-radius: 4px;
+    color: var(--col-cyan);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+.btn-center-view:hover {
+    background: rgba(0, 212, 255, 0.24);
+    border-color: var(--col-border-hover);
+    box-shadow: 0 0 12px var(--col-glow);
+}
+.center-view-icon { line-height: 1; }
+
 /* ═══ JOURNEY PLANNER PANEL ══════════════════════════════════════ */
 .panel-planner {
     top: 1.2rem;
@@ -278,6 +346,78 @@ html, body {
 
 /* ── Parameter Inputs ── */
 .param-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+/* ── Dual-row: Drive Output (70%) + Cruise (30%) ── */
+.param-dual-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+}
+.param-sub-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.param-sub-wide  { flex: 7; min-width: 0; }
+.param-sub-narrow { flex: 3; min-width: 0; }
+.param-input-compact { font-size: 0.78rem; }
+
+/* ── Range Slider ── */
+.param-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--col-border);
+    border-radius: 4px;
+    padding: 0.35rem 0.6rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.param-slider-row:focus-within {
+    border-color: var(--col-border-hover);
+    box-shadow: 0 0 0 2px var(--col-glow);
+}
+
+.param-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--col-cyan) 10%, rgba(0,212,255,0.18) 10%);
+    outline: none;
+    cursor: pointer;
+    min-width: 0;
+    transition: background 0.15s;
+}
+.param-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--col-cyan);
+    border: 2px solid var(--col-bg);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.6);
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+.param-slider::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--col-cyan);
+    border: 2px solid var(--col-bg);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.6);
+    cursor: pointer;
+}
+.param-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+}
+
+.param-slider-value {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--col-cyan);
+    opacity: 0.85;
+    white-space: nowrap;
+    min-width: 38px;
+    text-align: right;
+}
 
 .param-label-row {
     display: flex;
@@ -597,7 +737,7 @@ html, body {
     flex-shrink: 0;
 }
 
-/* ═══ LEGEND ══════════════════════════════════════════════════════ */
+/* ═══ LEGEND / MAP KEY ═══════════════════════════════════════════ */
 .panel-legend {
     bottom: 1.2rem;
     left: 1.2rem;
@@ -605,7 +745,35 @@ html, body {
     flex-direction: column;
     gap: 0.3rem;
     padding: 0.7rem 0.9rem;
-    min-width: 175px;
+    min-width: 195px;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+.panel-legend.is-collapsed {
+    max-height: 2.4rem;
+    overflow: hidden;
+}
+.panel-legend.is-collapsed .legend-collapse-btn {
+    transform: rotate(180deg);
+}
+
+.legend-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--col-border);
+    margin-bottom: 0.1rem;
+}
+
+.legend-collapse-btn {
+    margin-left: auto;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
 .legend-section-title {
@@ -634,9 +802,13 @@ html, body {
     border-radius: 50%;
     flex-shrink: 0;
 }
-.dot-habitable  { background: var(--col-habitable);  box-shadow: 0 0 6px var(--col-habitable); }
-.dot-industrial { background: var(--col-industrial); box-shadow: 0 0 6px var(--col-industrial); }
-.dot-anomaly    { background: var(--col-anomaly);    box-shadow: 0 0 6px var(--col-anomaly); }
+.dot-habitable-hub       { background: var(--col-habitable);  box-shadow: 0 0 6px var(--col-habitable); }
+.dot-habitable           { background: var(--col-habitable);  box-shadow: 0 0 6px var(--col-habitable); }
+.dot-industrial-mining   { background: var(--col-industrial); box-shadow: 0 0 6px var(--col-industrial); }
+.dot-industrial          { background: var(--col-industrial); box-shadow: 0 0 6px var(--col-industrial); }
+.dot-scientific-anomaly  { background: var(--col-anomaly);    box-shadow: 0 0 6px var(--col-anomaly); }
+.dot-anomaly             { background: var(--col-anomaly);    box-shadow: 0 0 6px var(--col-anomaly); }
+.dot-unexplored          { background: var(--col-unexplored); box-shadow: 0 0 4px var(--col-unexplored); }
 
 .legend-line {
     width: 22px; height: 3px;
@@ -693,9 +865,10 @@ html, body {
     border-radius: 2px;
     display: inline-block;
 }
-.tooltip-type-habitable-hub  { color: var(--col-habitable);  background: rgba(79, 195, 247, 0.12); }
-.tooltip-type-industrial-mining { color: var(--col-industrial); background: rgba(255, 167, 38, 0.12); }
-.tooltip-type-scientific-anomaly { color: var(--col-anomaly); background: rgba(206, 147, 216, 0.12); }
+.tooltip-type-habitable-hub      { color: var(--col-habitable);  background: rgba(79, 195, 247, 0.12); }
+.tooltip-type-industrial-mining  { color: var(--col-industrial); background: rgba(255, 167, 38, 0.12); }
+.tooltip-type-scientific-anomaly { color: var(--col-anomaly);    background: rgba(206, 147, 216, 0.12); }
+.tooltip-type-unexplored         { color: var(--col-unexplored); background: rgba(136, 136, 153, 0.12); }
 
 .tooltip-stellar {
     font-family: var(--font-mono);
@@ -744,16 +917,12 @@ html, body {
         0 0 24px rgba(0, 212, 255, 0.12),
         0 8px 32px rgba(0, 0, 0, 0.7);
     pointer-events: all;
-    animation: card-in 0.18s ease;
+    /* Flash bug fix: opacity controlled by JS rAF, not a CSS animation */
+    transition: opacity 0.12s ease;
     display: flex;
     flex-direction: column;
     gap: 0;
     overflow: hidden;
-}
-
-@keyframes card-in {
-    from { opacity: 0; transform: scale(0.94); }
-    to   { opacity: 1; transform: scale(1); }
 }
 
 .card-header {
@@ -816,9 +985,10 @@ html, body {
     display: inline-block;
     align-self: flex-start;
 }
-.type-habitable-hub   { color: var(--col-habitable);  background: rgba(79, 195, 247, 0.12);  border: 1px solid rgba(79, 195, 247, 0.25); }
-.type-industrial-mining { color: var(--col-industrial); background: rgba(255, 167, 38, 0.12); border: 1px solid rgba(255, 167, 38, 0.25); }
-.type-scientific-anomaly { color: var(--col-anomaly);  background: rgba(206, 147, 216, 0.12); border: 1px solid rgba(206, 147, 216, 0.25); }
+.type-habitable-hub      { color: var(--col-habitable);  background: rgba(79, 195, 247, 0.12);   border: 1px solid rgba(79, 195, 247, 0.25); }
+.type-industrial-mining  { color: var(--col-industrial); background: rgba(255, 167, 38, 0.12);  border: 1px solid rgba(255, 167, 38, 0.25); }
+.type-scientific-anomaly { color: var(--col-anomaly);    background: rgba(206, 147, 216, 0.12); border: 1px solid rgba(206, 147, 216, 0.25); }
+.type-unexplored         { color: var(--col-unexplored); background: rgba(136, 136, 153, 0.12); border: 1px solid rgba(136, 136, 153, 0.22); }
 
 .card-stellar {
     font-family: var(--font-mono);
@@ -989,3 +1159,41 @@ html, body {
     transform: translateY(-14px); /* offset above the trajectory line */
     user-select: none;
 }
+
+/* ═══ SYSTEM NAME LABELS (CSS2DRenderer, parented to star meshes) ═ */
+.system-label {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: rgba(190, 218, 255, 0.72);
+    text-shadow:
+        0 0 6px rgba(0, 212, 255, 0.5),
+        0 1px 3px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+    /* Subtle offset via CSS; the CSS2DObject position does the 3D offset */
+    transform: translateX(-50%);
+}
+
+/* ═══ MAP KEY TOGGLE ROW ═════════════════════════════════════════ */
+.legend-toggle-row {
+    justify-content: space-between;
+}
+
+.legend-toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.05rem;
+    margin-left: auto;
+}
+
+.legend-toggle-checkbox {
+    width: 13px; height: 13px;
+    accent-color: var(--col-cyan);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+

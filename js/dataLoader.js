@@ -2,7 +2,7 @@
  * @file dataLoader.js
  * @description Fetches and parses the stellar systems dataset via the Fetch API.
  * @module dataLoader
- * Last Modified: 2026-06-28
+ * Last Modified: 2026-06-30 (v0.2.0)
  */
 
 /**
@@ -24,11 +24,19 @@
  */
 
 /**
- * Fetches and returns the list of stellar systems from the JSON data file.
+ * @typedef {Object} MapData
+ * @property {System[]} systems       - Array of stellar system objects.
+ * @property {string}   mapName       - Display name of this star map (from `map_name`).
+ * @property {string}   mapDescription - Short description of this map (from `map_description`).
+ */
+
+/**
+ * Fetches and returns the stellar map data from the JSON data file.
+ * Expects a root object with `map_name`, `map_description`, and `systems` keys.
  * Requires an HTTP context — will not work over the file:// protocol.
  *
  * @param {string} [url='./data/systems.json'] - Path to the systems JSON file.
- * @returns {Promise<System[]>} Resolves to an array of system objects.
+ * @returns {Promise<MapData>} Resolves to a MapData object.
  * @throws {Error} If the fetch fails, returns a non-OK status, or yields invalid JSON.
  */
 export async function loadSystems(url = './data/systems.json') {
@@ -56,11 +64,19 @@ export async function loadSystems(url = './data/systems.json') {
         throw new Error(`Invalid JSON in systems data file: ${parseError.message}`);
     }
 
-    if (!Array.isArray(data)) {
-        throw new Error('Systems data must be a JSON array.');
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('Systems data must be a JSON object with a "systems" array.');
     }
 
-    return data;
+    if (!Array.isArray(data.systems)) {
+        throw new Error('Systems data object must contain a "systems" array.');
+    }
+
+    return {
+        systems:        data.systems,
+        mapName:        typeof data.map_name        === 'string' ? data.map_name        : 'Unknown Map',
+        mapDescription: typeof data.map_description === 'string' ? data.map_description : '',
+    };
 }
 
 /**
@@ -68,7 +84,7 @@ export async function loadSystems(url = './data/systems.json') {
  * Keeps the version number as a single source of truth — no duplicate constants.
  *
  * @param {string} [url='./package.json'] - Path to package.json.
- * @returns {Promise<string>} The `version` field value (e.g. "0.1.1").
+ * @returns {Promise<string>} The `version` field value (e.g. "0.2.0").
  * @throws {Error} If the fetch fails or the version field is missing.
  */
 export async function loadVersion(url = './package.json') {

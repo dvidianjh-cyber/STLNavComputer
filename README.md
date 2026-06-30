@@ -27,7 +27,7 @@ STLNavComputer/
 ├── index.html          # Full-screen canvas + UI overlay
 ├── style.css           # Glassmorphism HUD theme
 ├── data/
-│   └── systems.json    # 41-system stellar dataset (v0.1.0 sample data)
+│   └── systems.json    # 'ONDARI EMPIRE' Dataset
 ├── js/
 │   ├── app.js          # Orchestrator & state manager
 │   ├── dataLoader.js   # Fetch API data loader

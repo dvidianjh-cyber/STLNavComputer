@@ -5,6 +5,30 @@ Format: `[vX.X.X] — YYYY-MM-DD`
 
 ---
 
+## [v0.2.0] — 2026-06-30
+
+### Added
+- **Current System Panel** — New top-centre HUD panel with a dropdown listing all 56 star systems. Selecting a system updates the global selected-system state and moves the highlight sphere to that system's 3D coordinates. A `⊕` Centre View button snaps the OrbitControls pivot to the selected system.
+- **3D System Name Labels** — Each star node now displays a crisp CSS2D text label (via `CSS2DRenderer`) rendered directly in the 3D viewport. Labels are parented to their star mesh and automatically follow the camera during orbit, pan, and zoom.
+- **Map Key Label Toggles** — Each system-type row in the Map Key now includes a checkbox. Toggling a checkbox shows/hides all CSS2D name labels belonging to that system type in real time.
+- **Map Key Collapse** — The Map Key / Legend panel now has a `⌄` collapse toggle matching the Journey Planner behaviour. Collapses and expands with a smooth `max-height` animation.
+- **Dynamic Map Grid** — The XZ-plane `GridHelper` now scales automatically based on the loaded dataset. The grid size is calculated as the maximum absolute X/Z coordinate across all systems, plus 10% padding. Previously hardcoded to 90 units.
+- **`map_name` / `map_description` header binding** — The "STL NAVIGATION SYSTEM" subtitle and "X SYSTEMS CHARTED" badge are now populated from the `map_name` and `map_description` fields in `systems.json` instead of being hardcoded.
+- **Unexplored system type** — Added rendering support for `"Unexplored"` system type: grey star colour (`#888899`), dedicated CSS dot and badge styles, and tooltip colour class.
+
+### Changed
+- **`systems.json` schema** — The data file is now a root object `{ "map_name", "map_description", "systems": [...] }` instead of a bare array. This is a breaking schema change; `dataLoader.js` updated accordingly.
+- **Drive Output input → Slider** — The Drive Output field in the Journey Planner is now a `<input type="range">` slider (range: 0.1–10 G) with a live value readout, replacing the previous number input (which had an impractical 100 G ceiling).
+- **Journey Planner layout** — Drive Output slider and Max Cruise Velocity input are now on a single flex row (70% / 30% split) to reduce vertical panel height.
+- **Journey Planner default state** — Panel now initialises collapsed rather than expanded.
+- **Selected-system highlight sphere** — The blue semi-transparent sphere no longer defaults to the world origin `(0,0,0)`. It binds to the "Current System" dropdown selection on load and on every change.
+
+### Fixed
+- **Pinned card flash bug** — Info cards briefly appeared at the left edge of the screen on creation before jumping to the correct pointer position. Fixed by injecting the card with `opacity: 0`, calculating and applying `transform: translate()` before the first paint, then fading in via `requestAnimationFrame`. The old `card-in` CSS keyframe animation has been removed.
+- **Pinned card shows system `id`** — The raw `sys_XXX` identifier was visible in the card header. Removed from the card DOM.
+
+---
+
 ## [v0.1.2] — 2026-06-29
 
 ### Added

@@ -1,8 +1,9 @@
 /**
  * @file renderer.js
- * @description Three.js scene management — stars, background starfield, route lines.
+ * @description Three.js scene management — stars, background starfield, route lines,
+ *              3D system name labels, dynamic grid, and selected-system highlight sphere.
  * @module renderer
- * Last Modified: 2026-06-28
+ * Last Modified: 2026-06-30 (v0.2.0)
  */
 
 import * as THREE from 'three';
@@ -20,6 +21,7 @@ const STAR_COLORS = {
     'Habitable Hub':       0x4fc3f7,
     'Industrial/Mining':   0xffa726,
     'Scientific Anomaly':  0xce93d8,
+    'Unexplored':          0x888899,
 };
 
 /** @type {Record<string, number>} Route segment colour by flight phase. */
@@ -33,6 +35,7 @@ const STAR_BASE_RADIUS  = 0.28;
 const CAPITAL_SYSTEM_ID = 'sys_001';
 const HOVER_SCALE       = 1.9;
 const ROUTE_SCALE       = 1.5;
+const GRID_PADDING      = 1.10; // 10% border padding around dataset
 
 // ─── Module-level State ─────────────────────────────────────────
 
@@ -53,13 +56,19 @@ let routeObjects = [];
 /** @type {LineMaterial[]} */
 let lineMaterials = [];
 /** @type {CSS2DObject[]} */
-let css2dObjects = [];
+let css2dRouteObjects = [];
 /** @type {boolean} */
 let needsRender = true;
 /** @type {THREE.WebGLRenderer} */
 let _renderer;
 /** @type {CSS2DRenderer} */
 let css2dRenderer;
+
+/** @type {THREE.Mesh} Translucent highlight sphere for selected system. */
+let _highlightSphere;
+
+/** @type {Map<string, CSS2DObject>} System name labels: systemId → CSS2DObject */
+const _labelObjects = new Map();
 
 // ─── Public API ──────────────────────────────────────────────────
 
@@ -110,7 +119,19 @@ export function initScene(canvas) {
     scene.add(starGroup);
     scene.add(routeGroup);
 
-    // CSS2D Renderer — for leg-time labels anchored to 3D space
+    // Selected system highlight sphere (starts invisible; moved on first setSelectedSystem call)
+    const hlGeo = new THREE.SphereGeometry(1.2, 24, 16);
+    const hlMat = new THREE.MeshBasicMaterial({
+        color:       0x0088ff,
+        transparent: true,
+        opacity:     0.18,
+        depthWrite:  false,
+    });
+    _highlightSphere = new THREE.Mesh(hlGeo, hlMat);
+    _highlightSphere.visible = false;
+    scene.add(_highlightSphere);
+
+    // CSS2D Renderer — for leg-time labels and system name labels
     css2dRenderer = new CSS2DRenderer();
     css2dRenderer.setSize(window.innerWidth, window.innerHeight);
     Object.assign(css2dRenderer.domElement.style, {
@@ -122,9 +143,10 @@ export function initScene(canvas) {
     });
     document.body.appendChild(css2dRenderer.domElement);
 
-    // Background & grid
+    // Background
     scene.add(_buildStarfield());
-    scene.add(_buildGrid());
+
+    // Grid is deferred until loadStars() provides dataset extents
 
     // Resize
     window.addEventListener('resize', _handleResize);
@@ -166,12 +188,21 @@ export function worldToScreen(coords) {
 
 /**
  * Creates star meshes for all systems and adds them to the scene.
+ * Also builds per-star CSS2D name labels and a dynamically-sized grid.
  * @param {import('./dataLoader.js').System[]} systems
  * @returns {Array<{mesh: THREE.Mesh, system: object}>}
  */
 export function loadStars(systems) {
     starGroup.clear();
     starMeshes = [];
+    _labelObjects.clear();
+
+    // Calculate dataset extents for dynamic grid
+    let maxXZ = 0;
+    systems.forEach(sys => {
+        maxXZ = Math.max(maxXZ, Math.abs(sys.coordinates.x), Math.abs(sys.coordinates.z));
+    });
+    scene.add(_buildGrid(maxXZ));
 
     systems.forEach(system => {
         const color   = STAR_COLORS[system.type] ?? 0xffffff;
@@ -198,6 +229,17 @@ export function loadStars(systems) {
         });
         mesh.add(new THREE.Mesh(glowGeo, glowMat));
 
+        // CSS2D system name label
+        const labelEl = document.createElement('div');
+        labelEl.className   = 'system-label';
+        labelEl.textContent = system.name;
+
+        const labelObj = new CSS2DObject(labelEl);
+        labelObj.position.set(0, radius + 0.4, 0); // slightly above star
+        labelObj.userData.systemType = system.type;
+        mesh.add(labelObj);
+        _labelObjects.set(system.id, labelObj);
+
         starGroup.add(mesh);
         starMeshes.push({ mesh, system });
     });
@@ -211,6 +253,44 @@ export function loadStars(systems) {
  * @returns {Array<{mesh: THREE.Mesh, system: object}>}
  */
 export function getStarMeshes() { return starMeshes; }
+
+/**
+ * Moves the blue highlight sphere to the coordinates of the given system.
+ * @param {import('./dataLoader.js').System} system
+ */
+export function setSelectedSystem(system) {
+    if (!_highlightSphere) return;
+    const { x, y, z } = system.coordinates;
+    _highlightSphere.position.set(x, y, z);
+    _highlightSphere.visible = true;
+    markDirty();
+}
+
+/**
+ * Shows/hides CSS2D name labels based on a set of hidden system types.
+ * @param {Set<string>} hiddenTypesSet
+ */
+export function setHiddenLabelTypes(hiddenTypesSet) {
+    starMeshes.forEach(({ system, mesh }) => {
+        const labelObj = _labelObjects.get(system.id);
+        if (labelObj) {
+            labelObj.visible = !hiddenTypesSet.has(system.type);
+        }
+    });
+    markDirty();
+}
+
+/**
+ * Animates (or snaps) the OrbitControls target to a system's coordinates
+ * so the camera pivots around that system.
+ * @param {import('./dataLoader.js').System} system
+ */
+export function centerOnSystem(system) {
+    const { x, y, z } = system.coordinates;
+    controls.target.set(x, y, z);
+    controls.update();
+    markDirty();
+}
 
 /**
  * Applies hover highlight to a star mesh, clearing any previous highlight.
@@ -316,7 +396,7 @@ export function drawRoute(routeResult) {
             const labelObj = new CSS2DObject(labelEl);
             labelObj.position.copy(mid);
             routeGroup.add(labelObj);
-            css2dObjects.push(labelObj);
+            css2dRouteObjects.push(labelObj);
         }
     });
 
@@ -332,10 +412,10 @@ export function clearRoute() {
         if (obj.geometry) obj.geometry.dispose();
     });
     lineMaterials.forEach(m => m.dispose());
-    css2dObjects.forEach(obj => routeGroup.remove(obj));
-    routeObjects  = [];
-    lineMaterials = [];
-    css2dObjects  = [];
+    css2dRouteObjects.forEach(obj => routeGroup.remove(obj));
+    routeObjects      = [];
+    lineMaterials     = [];
+    css2dRouteObjects = [];
     markDirty();
 }
 
@@ -385,11 +465,17 @@ function _buildStarfield() {
 }
 
 /**
- * Builds a subtle reference grid centred on the origin.
+ * Builds a reference grid on the XZ plane.
+ * Size is calculated dynamically from the max absolute X/Z coordinate in the dataset,
+ * plus 10% padding as specified in v0.2.0.
+ * @param {number} maxXZ - Maximum absolute value on X or Z axis in the dataset.
  * @returns {THREE.GridHelper}
  */
-function _buildGrid() {
-    const grid = new THREE.GridHelper(90, 18, 0x08203f, 0x08203f);
+function _buildGrid(maxXZ) {
+    const rawSize   = Math.max(maxXZ, 10); // minimum sensible size
+    const gridSize  = Math.ceil(rawSize * GRID_PADDING);
+    const divisions = Math.max(10, Math.round(gridSize / 6)); // ~6 LY per cell
+    const grid      = new THREE.GridHelper(gridSize * 2, divisions * 2, 0x08203f, 0x08203f);
     grid.position.y = -0.05;
     return grid;
 }
